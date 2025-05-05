@@ -1,0 +1,315 @@
+[23bcs074@mepcolinux ex4]$cat binary.c
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to merge two halves of an array
+void merge(int arr[], int left, int mid, int right) {
+    int i, j, k;
+    int n1 = mid - left + 1; // Size of left subarray
+    int n2 = right - mid;    // Size of right subarray
+
+    // Create temporary arrays
+    int *L = (int *)malloc(n1 * sizeof(int));
+    int *R = (int *)malloc(n2 * sizeof(int));
+
+    // Copy data to temporary arrays
+    for (i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[mid + 1 + j];
+
+    // Merge the temporary arrays back into arr[left..right]
+    i = 0; // Initial index of first subarray
+    j = 0; // Initial index of second subarray
+    k = left; // Initial index of merged subarray
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    // Copy the remaining elements of L[], if there are any
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    // Copy the remaining elements of R[], if there are any
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+
+    // Free temporary arrays
+    free(L);
+    free(R);
+}
+
+// Merge Sort function
+void mergeSort(int arr[], int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sorting first and second halves
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+
+        // Merging the sorted halves
+        merge(arr, left, mid, right);
+    }
+}
+
+// Function for Binary Search
+int binarySearch(int arr[], int size, int target) {
+    int left = 0;
+    int right = size - 1;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+
+        // Check if target is present at mid
+        if (arr[mid] == target) {
+            return mid; // Return the index of the target
+        }
+        // If target is greater, ignore the left half
+        else if (arr[mid] < target) {
+            left = mid + 1;
+        }
+        // If target is smaller, ignore the right half
+        else {
+            right = mid - 1;
+        }
+    }
+
+    return -1; // Target is not present in the array
+}
+
+// Main function
+int main() {
+    int size;
+
+    // Get the size of the array from the user
+    printf("Enter the number of elements in the array: ");
+    scanf("%d", &size);
+
+    // Dynamically allocate memory for the array
+    int *arr = (int *)malloc(size * sizeof(int));
+
+    // Get the array elements from the user
+    printf("Enter the elements of the array: ");
+    for (int i = 0; i < size; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    // Get the target value from the user
+    int target;
+    printf("Enter the value to search for: ");
+    scanf("%d", &target);
+
+    // Sort the array using merge sort
+    mergeSort(arr, 0, size - 1);
+
+    // Print sorted array
+    printf("Sorted array: ");
+    for (int i = 0; i < size; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+
+    // Perform binary search
+    int result = binarySearch(arr, size, target);
+
+    // Print the result
+    if (result != -1) {
+        printf("Element %d found at index %d\n", target, result);
+    } else {
+        printf("Element %d not found in the array\n", target);
+    }
+
+    // Free dynamically allocated memory
+    free(arr);
+
+    return 0;
+}
+[23bcs074@mepcolinux ex4]$cc -std=c99 binary.c
+[23bcs074@mepcolinux ex4]$./a.out
+Enter the number of elements in the array: 6
+Enter the elements of the array: 34 21 22 76 89 11
+Enter the value to search for: 11
+Sorted array: 11 21 22 34 76 89
+Element 11 found at index 0
+[23bcs074@mepcolinux ex4]$cat ins.c
+#include <stdio.h>
+#include <stdlib.h>
+
+void insertionSort(int arr[], int n)
+{
+        int i;
+        for (i = 1; i < n; i++)
+        {
+                int key = arr[i];
+                int j = i - 1;
+                while (j >= 0 && arr[j] > key)
+                {
+                        arr[j + 1] = arr[j];
+                        j = j - 1;
+                }
+                arr[j + 1] = key;
+        }
+}
+
+void printArray(int arr[], int n)
+{
+        int i;
+        for (i = 0; i < n; i++)
+                printf("%d ", arr[i]);
+        printf("\n");
+}
+
+int main()
+{
+        int *arr;
+        int n;
+        printf("Enter size of array:");
+        scanf("%d",&n);
+        arr=(int*)malloc(n*sizeof(int));
+        int i;
+        printf("\n");
+        for(i=0;i<n;i++)
+        {
+                printf("Enter element %d :",i+1);
+                scanf("%d",&arr[i]);
+        }
+        printf("\nResult of the given array :\n------ -- --- ----- -----\n");
+        printf("\nGiven array is \n");
+        printArray(arr, n);
+        insertionSort(arr, n);
+        printf("\nSorted array is \n");
+        printArray(arr, n);
+        return 0;
+}
+[23bcs074@mepcolinux ex4]$cc ins.c
+[23bcs074@mepcolinux ex4]$./a.out
+Enter size of array:6
+
+Enter element 1 :32
+Enter element 2 :12
+Enter element 3 :66
+Enter element 4 :78
+Enter element 5 :89
+Enter element 6 :8
+
+Result of the given array :
+------ -- --- ----- -----
+
+Given array is
+32 12 66 78 89 8
+
+Sorted array is
+8 12 32 66 78 89
+[23bcs074@mepcolinux ex4]$cat heap.c
+#include <stdio.h>
+#include <stdlib.h>
+void swap(int *a, int *b)
+{
+        int temp = *a;
+        *a = *b;
+        *b = temp;
+}
+
+void heapify(int arr[], int n, int i)
+{
+        int largest = i;  // Initialize largest as root
+        int left = 2 * i + 1;  // left = 2*i + 1
+        int right = 2 * i + 2;  // right = 2*i + 2
+
+        if (left < n && arr[left] > arr[largest])
+                largest = left;
+
+        if (right < n && arr[right] > arr[largest])
+                largest = right;
+
+        if (largest != i)
+        {
+                swap(&arr[i], &arr[largest]);
+                heapify(arr, n, largest);
+        }
+}
+
+void heapSort(int arr[], int n)
+{
+        int i;
+        for (i=(n/2)-1;i>=0;i--)
+                heapify(arr, n, i);
+        for (i=n-1;i>0;i--)
+        {
+                swap(&arr[0], &arr[i]);
+                heapify(arr, i, 0);
+        }
+}
+
+void printArray(int arr[], int n)
+{
+        int i;
+        for (i = 0; i < n; ++i)
+                printf("%d ", arr[i]);
+        printf("\n");
+}
+
+int main()
+{
+        int *arr;
+        int n;
+        printf("\nHEAP SORT\n---- ----\n\n");
+        printf("Enter size of array:");
+        scanf("%d",&n);
+        arr=(int*)malloc(n*sizeof(int));
+        int i;
+        printf("\n");
+        for(i=0;i<n;i++)
+        {
+                printf("Enter element %d :",i+1);
+                scanf("%d",&arr[i]);
+        }
+        printf("\nResult of the given array :\n------ -- --- ----- -----\n");
+        printf("\nGiven array is \n");
+        printArray(arr, n);
+        heapSort(arr, n);
+        printf("\nSorted array is \n");
+        printArray(arr, n);
+        return 0;
+}
+
+
+[23bcs074@mepcolinux ex4]$cc heap.c
+[23bcs074@mepcolinux ex4]$./a.out
+
+HEAP SORT
+---- ----
+
+Enter size of array:6
+
+Enter element 1 :47
+Enter element 2 :28
+Enter element 3 :69
+Enter element 4 :12
+Enter element 5 :33
+Enter element 6 :31
+
+Result of the given array :
+------ -- --- ----- -----
+
+Given array is
+47 28 69 12 33 31
+
+Sorted array is
+12 28 31 33 47 69
+[23bcs074@mepcolinux ex4]$exit
+exit
+
