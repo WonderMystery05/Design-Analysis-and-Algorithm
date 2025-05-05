@@ -1,0 +1,203 @@
+[23bcs074@mepcolinux ex5]$cat ex5.prn
+Script started on Tue 18 Mar 2025 08:00:08 PM IST
+[23bcs074@mepcolinux ex5]$cat horspool.c
+#include <stdio.h>
+#include <string.h>
+#define MAX_CHARS 256
+
+void trimnewline(char str[]) {
+    int len = strlen(str);
+    if (len > 0 && str[len - 1] == '\n') {
+        str[len - 1] = '\0';
+    }
+}
+
+void createShiftTable(const char P[], int m, int p[MAX_CHARS]) {
+    int i;
+    for (i = 0; i < MAX_CHARS; i++)
+        p[i] = m;
+
+    for (i = 0; i < m - 1; i++)
+        p[(unsigned char)P[i]] = m - 1 - i;
+}
+
+
+void printShiftTable(int p[MAX_CHARS]) {
+    char c;
+    printf("\nShift Table (Uppercase Only):\n");
+
+    printf("Chars  : ");
+    for (c = 'A'; c <= 'Z'; c++)
+        printf("%c  ", c);
+
+    printf("\nShifts : ");
+    for (c = 'A'; c <= 'Z'; c++)
+        printf("%d  ", p[(unsigned char)c]);
+
+    printf("\n");
+}
+
+int searchPattern(const char T[], const char P[], int p[MAX_CHARS]) {
+    int n,m,i,k,j;
+    n = strlen(T);
+    m = strlen(P);
+
+    printf("\n%s\n", T);
+
+    i = m - 1;
+    while (i <= n - 1) {
+        k = 0;
+
+        while (k <= m - 1 && P[m - 1 - k] == T[i - k]) {
+            k++;
+        }
+
+        for (j = 0; j < i - m + 1; j++)
+            printf(" ");
+        printf("%s", P);
+
+        if (k <= m - 1)
+            printf(" x");
+
+        printf("\n");
+
+        if (k == m) {
+            return i - m + 1;
+        }
+
+        i = i + p[(unsigned char)T[i]];
+    }
+
+    return -1;
+}
+
+int main() {
+    char T[100], P[50];
+    int p[MAX_CHARS];
+    int result;
+
+    printf("Enter the text (Uppercase Only): ");
+    fgets(T, sizeof(T), stdin);
+    trimnewline(T);
+
+    printf("Enter the pattern to search (Uppercase Only): ");
+    fgets(P, sizeof(P), stdin);
+    trimnewline(P);
+
+    createShiftTable(P, strlen(P), p);
+
+    printShiftTable(p);
+
+    result = searchPattern(T, P, p);
+    if (result != -1) {
+        printf("\nPattern found (%s) at index %d\n", P, result);
+    } else {
+        printf("\nPattern not found\n");
+    }
+
+    return 0;
+}
+
+[23bcs074@mepcolinux ex5]$cc -std=c99 horspool.c
+[23bcs074@mepcolinux ex5]$./a.out
+Enter the text (Uppercase Only): HELLO THIS IS DAA LAB
+Enter the pattern to search (Uppercase Only): LAB
+
+Shift Table (Uppercase Only):
+Chars  : A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W  X  Y  Z
+Shifts : 1  3  3  3  3  3  3  3  3  3  3  2  3  3  3  3  3  3  3  3  3  3  3  3  3  3
+
+HELLO THIS IS DAA LAB
+LAB x
+  LAB x
+     LAB x
+        LAB x
+           LAB x
+              LAB x
+               LAB x
+                  LAB
+
+Pattern found (LAB) at index 18
+[23bcs074@mepcolinux ex5]$cat counting.c
+#include <stdio.h>
+
+void comparisonBasedCounting(int A[], int n, int S[]) {
+    int count[n];
+    int i,j,k;
+
+    printf("\nInitial Array:\n");
+    printf("               ");
+    for (i = 0; i < n; i++)
+        printf("%d   ", A[i]);
+    printf("\n\n");
+
+    printf("Initially count (lookup table):\n");
+    printf("               ");
+    for (i = 0; i < n; i++) {
+        count[i] = 0;
+        printf("0   ");
+    }
+    printf("\n\n");
+
+    for (i = 0; i < n - 1; i++) {
+        printf("Pass %d:        ", i);
+        for (j = i + 1; j < n; j++) {
+            if (A[i] < A[j])
+                count[j]++;
+            else
+                count[i]++;
+        }
+
+        for (k = 0; k < n; k++)
+            printf("%d   ", count[k]);
+        printf("\n");
+    }
+
+
+    for (i = 0; i < n; i++)
+        S[count[i]] = A[i];
+
+
+    printf("\nO/P Array:      ");
+    for (i = 0; i < n; i++)
+        printf("%d   ", S[i]);
+    printf("\n");
+}
+
+int main() {
+    int n,i;
+
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    int A[n], S[n];
+
+    printf("Enter the elements: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &A[i]);
+
+    comparisonBasedCounting(A, n, S);
+
+    return 0;
+}
+
+
+[23bcs074@mepcolinux ex5]$cat counting.c
+[23bcs074@mepcolinux ex5]$./a.out
+Enter the number of elements: 5
+Enter the elements: 76 32 11 89 43
+
+Initial Array:
+               76   32   11   89   43
+
+Initially count (lookup table):
+               0   0   0   0   0
+
+Pass 0:        3   0   0   1   0
+Pass 1:        3   1   0   2   1
+Pass 2:        3   1   0   3   2
+Pass 3:        3   1   0   4   2
+
+O/P Array:      11   32   43   76   89
+[23bcs074@mepcolinux ex5]$exit
+exit
