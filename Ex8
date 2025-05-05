@@ -1,0 +1,109 @@
+[23bcs074@mepcolinux ex8]$cat maximum.c
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_V 100
+
+bool bfs(int rGraph[MAX_V][MAX_V], int s, int t, int parent[], int V) {
+    bool visited[MAX_V];
+    memset(visited, 0, sizeof(visited));
+
+    int queue[MAX_V];
+    int front = 0, rear = 0;
+
+    queue[rear++] = s;
+    visited[s] = true;
+    parent[s] = -1;
+
+    while (front < rear) {
+        int u = queue[front++];
+        int v;
+        for (v = 0; v < V; v++) {
+            if (!visited[v] && rGraph[u][v] > 0) {
+                queue[rear++] = v;
+                parent[v] = u;
+                visited[v] = true;
+            }
+        }
+    }
+
+    return visited[t];
+
+}
+
+int  shortestAugmentingPath(int graph[MAX_V][MAX_V], int s, int t, int V) {
+    int u, v;
+    int rGraph[MAX_V][MAX_V];
+    for (u = 0; u < V; u++)
+        for (v = 0; v < V; v++)
+            rGraph[u][v] = graph[u][v];
+    int parent[MAX_V];
+    int maxFlow = 0;
+    while (bfs(rGraph, s, t, parent, V)) {
+        int pathFlow = INT_MAX;
+        for (v = t; v != s; v = parent[v]) {
+            u = parent[v];
+            pathFlow = (pathFlow < rGraph[u][v]) ? pathFlow : rGraph[u][v];
+        }
+        for(v=t;v!=s;v=parent[v]){
+           u=parent[v];
+           printf("%d - ",v+1);
+        }
+        printf("%d with flow: %d\n",s+1,pathFlow);
+
+       for (v = t; v != s; v = parent[v]) {
+            u = parent[v];
+            rGraph[u][v] -= pathFlow;
+            rGraph[v][u] += pathFlow;
+        }
+        maxFlow += pathFlow;
+    }
+
+    return maxFlow;
+}
+int main() {
+    int V, s, t;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &V);
+    printf("Enter the source vertex (0 to %d): ", V - 1);
+    scanf("%d", &s);
+    printf("Enter the sink vertex (0 to %d): ", V - 1);
+    scanf("%d", &t);
+    int graph[MAX_V][MAX_V] = {0};
+    printf("Enter the capacities of the edges (format: u v capacity), enter -1 to stop:\n");
+    while (true) {
+        int u, v, capacity;
+        scanf("%d", &u);
+        if (u == -1) break;
+        scanf("%d %d", &v, &capacity);
+        graph[u][v] = capacity;
+    }
+
+    int maxFlow = shortestAugmentingPath(graph, s, t, V);
+    printf("The maximum possible flow is %d\n", maxFlow);
+
+    return 0;
+}
+[23bcs074@mepcolinux ex8]$cc maximum.c
+[23bcs074@mepcolinux ex8]$./a.out
+Enter the number of vertices: 6
+Enter the source vertex (0 to 5): 0
+Enter the sink vertex (0 to 5): 5
+Enter the capacities of the edges (format: u v capacity), enter -1 to stop:
+0 1 5
+0 2 6
+1 3 4
+1 4 2
+2 3 7
+3 5 8
+4 5 4
+-1
+6 - 4 - 2 - 1 with flow: 4
+6 - 5 - 2 - 1 with flow: 1
+6 - 4 - 3 - 1 with flow: 4
+6 - 5 - 2 - 4 - 3 - 1 with flow: 1
+The maximum possible flow is 10
+[23bcs074@mepcolinux ex8]$exit
+exit
