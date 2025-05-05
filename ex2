@@ -1,0 +1,151 @@
+[23bcs074@mepcolinux ex2]$cat closest.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+struct Pair {
+    int x;
+    int y;
+};
+
+double findMin(int n, struct Pair p[], struct Pair closest[]) {
+    double min = 9999.0;
+    double distance;
+    int i, j;
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = i + 1; j < n; j++) {
+
+            distance = sqrt(pow(p[i].x - p[j].x, 2) + pow(p[i].y - p[j].y, 2));
+
+            if (min > distance) {
+                min = distance;
+                closest[0] = p[i];
+                closest[1] = p[j];
+            }
+        }
+    }
+    return min;
+}
+
+int main() {
+    int n, i;
+
+    printf("Enter the number of points: ");
+    scanf("%d", &n);
+
+    struct Pair* p = (struct Pair*)malloc(n * sizeof(*p));
+    if (p == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    for (i = 0; i < n; i++) {
+        printf("\nEnter x-coordinate-%d: ", i + 1);
+        scanf("%d", &p[i].x);
+        printf("Enter y-coordinate-%d: ", i + 1);
+        scanf("%d", &p[i].y);
+    }
+
+    struct Pair closest[2];
+    double minDistance = findMin(n, p, closest);
+
+    printf("\nMinimum Distance: %.2lf", minDistance);
+    printf("\nPoint 1: (%d, %d)", closest[0].x, closest[0].y);
+    printf("\nPoint 2: (%d, %d)", closest[1].x, closest[1].y);
+
+    free(p);
+
+    return 0;
+}
+[23bcs074@mepcolinux ex2]$cc closest.c
+[23bcs074@mepcolinux ex2]$./.a.out
+Enter the number of points: 6
+
+Enter x-coordinate-1: 2
+Enter y-coordinate-1: 5
+
+Enter x-coordinate-2: 2
+Enter y-coordinate-2: 1
+
+Enter x-coordinate-3: 2
+Enter y-coordinate-3: 7
+
+Enter x-coordinate-4: 5
+Enter y-coordinate-4: 1
+
+Enter x-coordinate-5: 5
+Enter y-coordinate-5: 7
+
+Enter x-coordinate-6: 1
+Enter y-coordinate-6: 7
+
+Minimum Distance: 1.00
+Point 1: (2, 7)
+Point 2: (1, 7)[23bcs074@mepcolinux ex2]$cat string.c
+#include <stdio.h>
+#include <string.h>
+int main() {
+    char text[100];
+    char pattern[100];
+    int i, j, k, l, m, n;
+
+    printf("Enter the text: ");
+    scanf("%[^\n]", text);
+    char ch;
+    scanf("%c",&ch);
+    n = strlen(text);
+
+    printf("Enter the pattern to be searched: ");
+    scanf("%[^\n]", pattern);
+    m = strlen(pattern);
+
+    printf("\n%s\n",text);
+
+    for (i = 0; i <= n - m; i++) {
+       for(k=0;k<i;k++){
+          printf(" ");
+       }
+       printf("%s\n",pattern);
+       j = 0;
+       while (j < m && pattern[j] == text[i + j]) {
+          j++;
+       }
+       if (j == m) {
+          printf("The pattern is found at index: %d\n", i);
+          return 0;
+       }
+    }
+    printf("\nPattern not found.\n");
+    return -1;
+}
+
+[23bcs074@mepcolinux ex2]$cc string.c
+[23bcs074@mepcolinux ex2]$./a.out
+Enter the text: hello there
+Enter the pattern to be searched: ere
+hello there
+ere
+ ere
+  ere
+   ere
+    ere
+     ere
+      ere
+       ere
+        ere
+The pattern is found at index: 8
+[23bcs074@mepcolinux ex2]$./a.out
+Enter the text: hello
+Enter the pattern to be searched: hi
+
+hello
+hi
+ hi
+  hi
+   hi
+
+Pattern not found.
+[23bcs074@mepcolinux ex2]$exit
+exit
+
