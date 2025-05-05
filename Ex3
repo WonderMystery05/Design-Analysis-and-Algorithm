@@ -1,0 +1,190 @@
+[23bcs074@mepcolinux ex3]$cat ex3.prn
+Script started on Thursday 06 March 2025 04:27:56 PM IST
+[23bcs074@mepcolinux ex3]$cat minmax.c
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to find the maximum and minimum using divide and conquer
+void findMinMax(int arr[], int low, int high, int* max, int* min) {
+    // Base case: If there is only one element
+    if (low == high) {
+        *max = arr[low];
+        *min = arr[low];
+        return;
+    }
+
+    // Base case: If there are two elements
+    if (high == low + 1) {
+        if (arr[low] > arr[high]) {
+            *max = arr[low];
+            *min = arr[high];
+        } else {
+            *max = arr[high];
+            *min = arr[low];
+        }
+        return;
+    }
+
+    // Recursive case: Divide the array into two halves
+    int mid = (low + high) / 2;
+    int leftMax, leftMin, rightMax, rightMin;
+
+    // Recursively find max and min in the left half
+    findMinMax(arr, low, mid, &leftMax, &leftMin);
+    // Recursively find max and min in the right half
+    findMinMax(arr, mid + 1, high, &rightMax, &rightMin);
+
+    // Combine the results
+    *max = (leftMax > rightMax) ? leftMax : rightMax;
+    *min = (leftMin < rightMin) ? leftMin : rightMin;
+}
+
+// Main function
+int main() {
+    int n;
+
+    // Input the number of elements
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    // Dynamically allocate memory for the array
+    int* arr = (int*)malloc(n * sizeof(int));
+    if (arr == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1; // Exit if memory allocation fails
+    }
+
+    // Input the elements of the array
+    printf("Enter the elements:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    int max, min;
+    // Find the maximum and minimum
+    findMinMax(arr, 0, n - 1, &max, &min);
+
+    // Print the results
+    printf("Maximum: %d\n", max);
+    printf("Minimum: %d\n", min);
+
+    // Free the allocated memory
+    free(arr);
+    return 0;
+}
+[23bcs074@mepcolinux ex3]$cc -std=c99 minmax.c
+[23bcs074@mepcolinux ex3]$./a.out
+Enter the number of elements: 6
+Enter the elements:
+45 78 32 1 90 6
+Maximum: 90
+Minimum: 1
+[23bcs074@mepcolinux ex3]$cat quick.c
+#include<stdio.h>
+#include<stdlib.h>
+
+void swap(int *b,int *c)
+{
+   int temp = *b;
+   *b = *c;
+   *c = temp;
+}
+
+int partition(int arr[], int low, int high)
+{
+    int p = arr[low];
+    int i = low;
+    int j = high + 1;
+    while (1)
+    {
+        do
+        {
+            i++;
+        } while (i <= high && arr[i] <= p);
+        do
+        {
+            j--;
+        } while (arr[j] > p);
+        if (i >= j)
+        {
+            break;
+        }
+        swap(&arr[i], &arr[j]);
+        /*printf("Array after swapping: ");
+        int k;
+        for (k = 0; k <= high; k++)
+        {
+           printf("%d ", arr[k]);
+        }
+        printf("\n");*/
+    }
+    swap(&arr[low], &arr[j]);
+    printf("Array after swapping with pivot: ");
+    int k;
+    for (k = 0; k <= high; k++)
+    {
+       printf("%d  ", arr[k]);
+    }
+    printf("\n");
+    return j;
+}
+
+void quicksort(int arr[], int low, int high)
+{
+    if (low < high)
+    {
+        int k;
+        int s = partition(arr, low, high);
+
+        quicksort(arr, low, s - 1);
+        quicksort(arr, s + 1, high);
+        /*printf("Array after sorting range (%d, %d): ", low, high);
+        for (k = 0; k <= high; k++)
+        {
+           printf("%d ", arr[k]);
+        }
+        printf("\n");*/
+    }
+}
+
+int main()
+{
+    int n, i;
+    printf("Enter the no. of elements in array: ");
+    scanf("%d", &n);
+    int *arr = (int *)malloc(n * sizeof(int));
+    printf("Enter elements: ");
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d", &arr[i]);
+    }
+    printf("Original Array: ");
+    for (i = 0; i < n; i++)
+    {
+        printf("%d  ", arr[i]);
+    }
+    printf("\n");
+
+    quicksort(arr, 0, n - 1);
+
+    printf("Sorted Array: ");
+    for (i = 0; i < n; i++)
+    {
+        printf("%d  ", arr[i]);
+    }
+    printf("\n");
+
+    free(arr);
+    return 0;
+}
+[23bcs074@mepcolinux ex3]$cc quick.c
+[23bcs074@mepcolinux ex3]$./a.out
+Enter the no. of elements in array: 5
+Enter elements: 56 43 21 9 33
+Original Array: 56  43  21  9  33
+Array after swapping with pivot: 33  43  21  9  56
+Array after swapping with pivot: 21  9  33  43
+Array after swapping with pivot: 9  21
+Sorted Array: 9  21  33  43  56
+[23bcs074@mepcolinux ex3]$exit
+exit
