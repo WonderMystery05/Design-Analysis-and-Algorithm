@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_N 20  // Maximum board size
+
+int solution_count = 0;  // Global counter for solutions
+
+// Print the chessboard configuration and solution vector
+void print_solution(int board[], int n) {
+    printf("Solution #%d:\n", ++solution_count);
+
+    // Print solution vector
+    printf("Vector: [");
+    for (int i = 0; i < n; i++) {
+        printf("%d%s", board[i], (i < n-1) ? ", " : "");
+    }
+    printf("]\n");
+
+    // Print chessboard visualization
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%c ", (board[i] == j) ? 'Q' : '.');
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+// Check if a queen can be placed at (row, col)
+bool is_safe(int board[], int row, int col) {
+    for (int i = 0; i < row; i++) {
+        if (board[i] == col ||
+            abs(board[i] - col) == abs(i - row)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Recursive backtracking function
+void solve_nqueens(int board[], int row, int n, bool find_all) {
+    if (row == n) {
+        print_solution(board, n);
+        return;
+    }
+
+    for (int col = 0; col < n; col++) {
+        if (is_safe(board, row, col)) {
+            board[row] = col;  // Place queen
+            solve_nqueens(board, row + 1, n, find_all);
+
+            if (!find_all && solution_count > 0) {
+                return;  // Stop after first solution
+            }
+
+            board[row] = -1;  // Backtrack
+        }
+    }
+}
+
+int main() {
+    int n;
+    int board[MAX_N];  // board[i] stores column position for row i
+
+    printf("Enter number of queens (1-%d): ", MAX_N);
+    scanf("%d", &n);
+
+    if (n < 1 || n > MAX_N) {
+        printf("Invalid input! Please enter between 1 and %d.\n", MAX_N);
+        return 1;
+    }
+
+    bool find_all;
+    printf("Find all solutions? (0=No, 1=Yes): ");
+    scanf("%d", &find_all);
+
+    // Initialize board
+    for (int i = 0; i < n; i++) {
+        board[i] = -1;
+    }
+
+    printf("\nSolving %d-Queens problem...\n", n);
+    solve_nqueens(board, 0, n, find_all);
+
+    if (solution_count == 0) {
+        printf("No solutions found for %d-Queens problem.\n", n);
+    } else {
+        printf("Total solutions found: %d\n", solution_count);
+    }
+
+    return 0;
+}
+
+[23bcs074@mepcolinux ex9]$cc -std=c99 N-Queens.c
+[23bcs074@mepcolinux ex9]$
+[23bcs074@mepcolinux ex9]$./a.out
+Enter number of queens (1-20): 4
+Find all solutions? (0=No, 1=Yes): 1
+
+Solving 4-Queens problem...
+Solution #1:
+Vector: [1, 3, 0, 2]
+. Q . .
+. . . Q
+Q . . .
+. . Q .
+
+Solution #2:
+Vector: [2, 0, 3, 1]
+. . Q .
+Q . . .
+. . . Q
+. Q . .
+
+Total solutions found: 2
+[23bcs074@mepcolinux ex9]$exit
+exit
