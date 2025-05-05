@@ -1,0 +1,288 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct MinHeapNode {
+    char data;
+    float freq;
+    int left, right;
+};
+
+struct MinHeapNode newNode(char data, float freq) {
+    struct MinHeapNode temp;
+    temp.data = data;
+    temp.freq = freq;
+    temp.left = temp.right = -1;
+    return temp;
+}
+
+void swap(int* a, int* b) {
+   int temp;
+   temp = *a;
+   *a = *b;
+   *b = temp;
+}
+
+void heapify(struct MinHeapNode arr[], int n, int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && arr[left].freq < arr[smallest].freq)
+        smallest = left;
+    if (right < n && arr[right].freq < arr[smallest].freq)
+        smallest = right;
+    if (smallest != i) {
+        struct MinHeapNode temp = arr[i];
+        arr[i] = arr[smallest];
+        arr[smallest] = temp;
+        heapify(arr, n, smallest);
+    }
+}
+
+void buildHeap(struct MinHeapNode arr[], int n) {
+    int i; // Declare i here
+    for (i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+}
+
+struct MinHeapNode extractMin(struct MinHeapNode arr[], int* size) {
+    struct MinHeapNode minNode = arr[0];
+    arr[0] = arr[*size - 1];
+    (*size)--;
+    heapify(arr, *size, 0);
+    return minNode;
+}
+
+void insertHeap(struct MinHeapNode arr[], int* size, struct MinHeapNode node) {
+    (*size)++;
+    int i = *size - 1;
+    while (i && node.freq < arr[(i - 1) / 2].freq) {
+        arr[i] = arr[(i - 1) / 2];
+        i = (i - 1) / 2;
+    }
+    arr[i] = node;
+}
+
+struct MinHeapNode buildHuffmanTree(char data[], float freq[], int size, struct MinHeapNode nodes[], int* nodeCount) {
+    struct MinHeapNode heap[2 * size - 1];
+    int heapSize = size;
+    int i; // Declare i here
+    for (i = 0; i < size; ++i)
+        heap[i] = newNode(data[i], freq[i]);
+    buildHeap(heap, heapSize);
+
+    struct MinHeapNode left, right, top;
+    *nodeCount = 0;
+    while (heapSize > 1) {
+        left = extractMin(heap, &heapSize);
+        right = extractMin(heap, &heapSize);
+
+        top = newNode('\0', left.freq + right.freq);
+        top.left = *nodeCount;
+        top.right = *nodeCount + 1;
+
+        nodes[*nodeCount] = left;
+        nodes[*nodeCount + 1] = right;
+        *nodeCount += 2;
+
+        insertHeap(heap, &heapSize, top);
+    }
+    nodes[*nodeCount] = extractMin(heap, &heapSize);
+    *nodeCount += 1;
+    return nodes[*nodeCount - 1];
+}
+
+void generateCodes(struct MinHeapNode nodes[], int rootIndex, char* code, int top, char codes[][10]) {
+    if (nodes[rootIndex].left != -1) {
+        code[top] = '0';
+        generateCodes(nodes, nodes[rootIndex].left, code, top + 1, codes);
+    }
+    if (nodes[rootIndex].right != -1) {
+        code[top] = '1';
+        generateCodes(nodes, nodes[rootIndex].right, code, top + 1, codes);
+    }
+    if (nodes[rootIndex].left == -1 && nodes[rootIndex].right == -1) {
+        code[top] = '\0';
+        strcpy(codes[(int)nodes[rootIndex].data], code);
+        printf("Character: %c\t", nodes[rootIndex].data);
+        printf("Frequency: %.2f\t   ", nodes[rootIndex].freq);
+        printf("Code: %s\n", code);
+    }
+}
+
+void encodeString(char* input, char codes[256][10], char* output) {
+    output[0] = '\0';
+    int i; // Declare i here
+    for (i = 0; input[i] != '\0'; i++) {
+        strcat(output, codes[(int)input[i]]);
+    }
+}
+
+void decodeString(struct MinHeapNode nodes[], int rootIndex, char* encodedStr, char* decodedStr) {
+    int index = 0;
+    int current = rootIndex;
+    int i; // Declare i here
+    for (i = 0; encodedStr[i] != '\0'; i++) {
+        if (encodedStr[i] == '0')
+            current = nodes[current].left;
+        else
+            current = nodes[current].right;
+
+        if (nodes[current].left == -1 && nodes[current].right == -1) {
+            decodedStr[index++] = nodes[current].data;
+            current = rootIndex;
+        }
+    }
+    decodedStr[index] = '\0';
+}
+
+float calculateCompressionFactor(char data[], float freq[], char codes[][10], int n) {
+    float avgLength = 0;
+    int maxLength = 0;
+    int i; // Declare i here
+    for (i = 0; i < n; i++) {
+        int codeLength = strlen(codes[(int)data[i]]);
+        avgLength += codeLength * freq[i];
+        if (codeLength > maxLength) {
+            maxLength = codeLength;
+        }
+    }
+    return ((maxLength - avgLength) / maxLength) * 100;
+}
+
+int main() {
+    int n, i;
+    printf("\nEnter the number of characters [Non-negative number] : ");
+    scanf("%d", &n);
+
+    char* data = (char*)malloc(n * sizeof(char));
+    float* freq = (float*)malloc(n * sizeof(float));
+
+    printf("Enter symbols and their frequencies:\n");
+    for (i = 0; i < n; i++) {
+        printf("Symbol %d: ", i + 1);
+        scanf(" %c", &data[i]);
+        printf("Frequency: ");
+        scanf("%f", &freq[i]);
+        printf("\n");
+    }
+
+    struct MinHeapNode nodes[2 * n - 1];
+    int nodeCount = 0;
+    struct MinHeapNode root = buildHuffmanTree(data, freq, n, nodes, &nodeCount);
+
+    char* code = (char*)malloc(10 * sizeof(char));
+    char codes[n][10];
+    for (i = 0; i < n; i++) {
+        codes[i][0] = '\0';
+    }
+    generateCodes(nodes, nodeCount - 1, code, 0, codes);
+
+    char* inputStr = (char*)malloc(100 * sizeof(char));
+    char* encodedStr = (char*)malloc(1000 * sizeof(char));
+    char* decodedStr = (char*)malloc(100 * sizeof(char));
+
+    while (1) {
+        printf("\n1: Encode\n2. Decode\n3. Calculate Compression Factor\n0. Exit\nEnter choice : ");
+        int choice;
+        scanf("%d", &choice);
+        printf("\n");
+
+        if (choice == 0) {
+            break;
+        }
+        else if (choice == 1) {
+            printf("Enter a word to encode: ");
+            scanf("%s", inputStr);
+            encodeString(inputStr, codes, encodedStr);
+            printf("Encoded String: %s\n", encodedStr);
+        }
+        else if (choice == 2) {
+            printf("Enter a word to decode: ");
+            scanf("%s", inputStr);
+            decodeString(nodes, nodeCount - 1, inputStr, decodedStr);
+            printf("Decoded String: %s\n", decodedStr);
+        }
+        else if (choice == 3) {
+            float compressionFactor = calculateCompressionFactor(data, freq, codes, n);
+            printf("Compression Factor: %.2f%%\n", compressionFactor);
+        }
+        else {
+            printf("Invalid choice\n");
+        }
+    }
+
+    // Free allocated memory
+    free(data);
+    free(freq);
+    free(code);
+    free(inputStr);
+    free(encodedStr);
+    free(decodedStr);
+
+    return 0;
+}
+[23bcs074@mepcolinux ex7]$cc huffman.c
+
+[23bcs074@mepcolinux ex7]$cc jhuffman.c
+[23bcs074@mepcolinux ex7]$./a.out
+
+Enter the number of characters [Non-negative number] : 5
+Enter symbols and their frequencies:
+Symbol 1: A
+Frequency: 0.35
+
+Symbol 2: B
+Frequency: 0.1
+
+Symbol 3: C
+Frequency: 0.2
+
+Symbol 4: D
+Frequency: 0.2
+
+Symbol 5: _
+Frequency: 0.15
+
+Character: D    Frequency: 0.20    Code: 00
+Character: C    Frequency: 0.20    Code: 01
+Character: B    Frequency: 0.10    Code: 100
+Character: _    Frequency: 0.15    Code: 101
+Character: A    Frequency: 0.35    Code: 11
+
+1: Encode
+2. Decode
+3. Calculate Compression Factor
+0. Exit
+Enter choice : 1
+
+Enter a word to encode: BAD_CAD
+Encoded String: 1001100101011100
+
+1: Encode
+2. Decode
+3. Calculate Compression Factor
+0. Exit
+Enter choice : 2
+
+Enter a word to decode: 0011101
+Decoded String: DA_
+
+1: Encode
+2. Decode
+3. Calculate Compression Factor
+0. Exit
+Enter choice : 3
+
+Compression Factor: 25.00%
+
+1: Encode
+2. Decode
+3. Calculate Compression Factor
+0. Exit
+Enter choice : 0
+
+[23bcs074@mepcolinux ex7]$exit
+exit
+
